@@ -1,8 +1,6 @@
-# An organization for Vlasov codes in Julia
+# Julia Vlasov
 
-If you are interested to code in Julia the numerical solution of Vlasov equation, you can join us. Only one
-rule: make a package.
-
+JuliaVlasov is a Github organization created to share packages for solving numerically the Vlasov-Poisson and Vlasov-Maxwell systems in Julia. We try to provide a diverse set of common toolsand some test cases. If you are interested to code in Julia, you can join us. Only one rule: make a package.
 
 - [VlasovBase](https://github.com/JuliaVlasov/VlasovBase) is a package containing geometry and mesh types and some simple fields solvers.
 - [SemiLagrangian](https://github.com/JuliaVlasov/SemiLagrangian)  contains fast interpolation to solve the equation using the semi-lagrange approach.
