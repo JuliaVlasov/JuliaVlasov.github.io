@@ -5,7 +5,6 @@ JuliaVlasov is a Github organization created to share packages for solving numer
 - [VlasovBase](https://github.com/JuliaVlasov/VlasovBase) is a package containing geometry and mesh types and some simple fields solvers.
 - [SemiLagrangian](https://github.com/JuliaVlasov/SemiLagrangian)  contains fast interpolation to solve the equation using the semi-lagrange approach.
 - [FourierAdvections](https://github.com/JuliaVlasov/FourierAdvections) contains implementations of advection where derivatives are computed in Fourier space.
-- [VlasovExample](https://github.com/JuliaVlasov/VlasovExample)  is the package for test cases: Landau damping, Bump on tail, Two streams instability...
 - [HermiteGF](https://github.com/JuliaVlasov/HermiteGF)  is a stable implementation of Hermite interpolation.
 - [SplittingOperators](https://github.com/JuliaVlasov/SplittingOperators)  is a package containing macros to facilitate use of splittings techniques.
 
