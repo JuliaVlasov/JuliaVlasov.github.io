@@ -2,11 +2,11 @@
 
 JuliaVlasov is a Github organization created to share packages for solving numerically the Vlasov-Poisson and Vlasov-Maxwell systems in Julia. We try to provide a diverse set of common toolsand some test cases. If you are interested to code in Julia, you can join us. Only one rule: make a package.
 
-- [VlasovBase](https://github.com/JuliaVlasov/VlasovBase) is a package containing geometry and mesh types and some simple fields solvers.
-- [SemiLagrangian](https://github.com/JuliaVlasov/SemiLagrangian)  contains fast interpolation to solve the equation using the semi-lagrange approach.
-- [FourierAdvections](https://github.com/JuliaVlasov/FourierAdvections) contains implementations of advection where derivatives are computed in Fourier space.
-- [HermiteGF](https://github.com/JuliaVlasov/HermiteGF)  is a stable implementation of Hermite interpolation.
-- [SplittingOperators](https://github.com/JuliaVlasov/SplittingOperators)  is a package containing macros to facilitate use of splittings techniques.
+- [VlasovBase](https://github.com/JuliaVlasov/VlasovBase.jl) is a package containing geometry and mesh types and some simple fields solvers.
+- [SemiLagrangian](https://github.com/JuliaVlasov/SemiLagrangian.jl)  contains fast interpolation to solve the equation using the semi-lagrange approach.
+- [FourierAdvections](https://github.com/JuliaVlasov/FourierAdvections.jl) contains implementations of advection where derivatives are computed in Fourier space.
+- [HermiteGF](https://github.com/JuliaVlasov/HermiteGF.jl)  is a stable implementation of Hermite interpolation.
+- [SplittingOperators](https://github.com/JuliaVlasov/SplittingOperators.jl)  is a package containing macros to facilitate use of splittings techniques.
 
 ## Useful links
 
