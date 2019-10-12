@@ -1,1 +1,9 @@
+title: Your awesome title
+author: GitHub User
+email: your-email@domain.com
+description: > # 
+  JuliaVlasov is a Github organization created to share packages for 
+  solving numerically the Vlasov-Poisson and Vlasov-Maxwell systems in Julia. 
+  We try to provide a diverse set of common tools and some test cases. 
+
 theme: minima
