@@ -130,7 +130,7 @@ end
     Advection function along v
 
 $$
-\\frac{df}{dt} = e \\frac{df}{dv}
+\frac{df}{dt} = e \frac{df}{dv}
 $$
 
 """
@@ -147,8 +147,8 @@ end
     Advection function along x and e computation
 
 $$
-\\frac{df}{dt} = v \\frac{df}{dx}
-\\frac{\\partial E}{\\partial t} = \\int fv \\; dv
+\frac{df}{dt} = v \frac{df}{dx}
+\frac{\partial E}{\partial t} = \int fv \; dv
 $$
 
 """
@@ -179,7 +179,7 @@ Landau damping initialisation function
 [Wikipedia](https://en.wikipedia.org/wiki/Landau_damping)
 
 $$
-f(x,v) = \\frac{1}{\\sqrt{2\\pi}}(1+ ϵ \\cdot cos(kₓ x)) e^{-v^2/2}
+f(x,v) = \frac{1}{\sqrt{2\pi}}(1+ ϵ \cdot cos(kₓ x)) e^{-v^2/2}
 $$
 
 """
