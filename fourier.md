@@ -105,9 +105,11 @@ end
 
 advection! = AmpereAdvection( mesh ) 
 
-∂f/∂t − v ∂f/∂x  = 0
-∂E/∂t = −J = ∫ fv dv
-∂f/∂t − E(x) ∂f/∂v  = 0
+$$
+\frac{\partial f}{\partial t} - v \frac{\partial f}{\partial x}  = 0
+\frac{\partial E}{\partial t} = -J = \int fv dv
+\frac{\partial f}{\partial t} − E(x) \frac{\partial f}{\partial v}  = 0
+$$
 
 ```julia:./code_fourier/cell5
 struct AmpereAdvection 
@@ -149,8 +151,7 @@ end
 Advection function along x and e computation
 
 $$
-\frac{df}{dt} = v \frac{df}{dx}
-\frac{\partial E}{\partial t} = \int fv \; dv
+\frac{df}{dt} = v \frac{df}{dx} \frac{\partial E}{\partial t} = \int fv \; dv
 $$
 
 ```julia:./code_fourier/cell7
