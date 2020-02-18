@@ -33,10 +33,11 @@ solve_poisson!( efield_poisson, particle_group,
 <h3 id=charge_density ><a href="/gempic/index.html#charge_density">Charge density</a></h3>
 <pre><code class="julia hljs">xg = LinRange(xmin, xmax, nx)
 sval = eval_uniform_periodic_spline_curve(spline_degree-<span class=hljs-number >1</span>, rho)
-plot( xg, sval, label=<span class=hljs-string >"ρ"</span>)</code></pre>
+plot( xg, sval, label=<span class=hljs-string >"rho"</span>)</code></pre>
+<img src="/assets/gempic/code_gempic/output/gempic1.svg" alt="">
 <h3 id=electric_field ><a href="/gempic/index.html#electric_field">Electric field </a></h3>
 <pre><code class="julia hljs">sval = eval_uniform_periodic_spline_curve(spline_degree-<span class=hljs-number >1</span>, efield_poisson)
-plot( xg, sval, label=<span class=hljs-string >"efield"</span>)</code></pre>
+plot( xg, sval, label=<span class=hljs-string >"efield"</span>)</code></pre> <img src="/assets/gempic/code_gempic/output/gempic2.svg" alt="">
 <h3 id=initialize_the_arrays_for_the_spline_coefficients_of_the_fields ><a href="/gempic/index.html#initialize_the_arrays_for_the_spline_coefficients_of_the_fields">Initialize the arrays for the spline coefficients of the fields</a></h3>
 <pre><code class="julia hljs">efield_dofs = [copy(efield_poisson), zeros(<span class=hljs-built_in >Float64</span>, nx)]
 bfield_dofs = zeros(<span class=hljs-built_in >Float64</span>, nx)
@@ -75,6 +76,7 @@ thdiag = TimeHistoryDiagnostics( particle_group, maxwell_solver,
 first(thdiag.data, <span class=hljs-number >5</span>)
 
 plot(thdiag.data[!,:Time], log.(thdiag.data[!,:PotentialEnergyE1]))</code></pre>
+<img src="/assets/gempic/code_gempic/output/gempic3.svg" alt="">
 <div class=page-foot >
   <div class=copyright >
     &copy; Pierre Navaro. Last modified: February 18, 2020. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.

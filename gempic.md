@@ -15,7 +15,7 @@ Vlasov-Maxwell system.
 
 ## Install the GEMPIC package
 
-```julia
+```julia:./code_gempic/cell1
 using ProgressMeter, Plots, GEMPIC
 ```
 
@@ -23,7 +23,7 @@ using ProgressMeter, Plots, GEMPIC
 
 ### The physical parameters 
 
-```julia
+```julia:./code_gempic/cell2
 kx, α = 0.5, 0.5
 xmin, xmax = 0, 2π/kx
 domain = [xmin, xmax, xmax - xmin]
@@ -31,7 +31,7 @@ domain = [xmin, xmax, xmax - xmin]
 
 ### The numerical parameters
 
-```julia
+```julia:./code_gempic/cell3
 ∆t = 0.05
 nx = 32 
 n_particles = 100000
@@ -41,7 +41,7 @@ spline_degree = 3
 
 ### Initialize particles
 
-```julia
+```julia:./code_gempic/cell4
 mass, charge = 1.0, 1.0
 particle_group = GEMPIC.ParticleGroup{1,2}( n_particles, mass, charge, 1)   
 sampler = LandauDamping( α, kx)
@@ -51,7 +51,7 @@ sample!(sampler, particle_group)
 
 ### Particle-mesh coupling operators
 
-```julia
+```julia:./code_gempic/cell5
 kernel_smoother1 = ParticleMeshCoupling( domain, [nx], n_particles, 
                                          spline_degree-1, :galerkin)    
 
@@ -61,7 +61,7 @@ kernel_smoother0 = ParticleMeshCoupling( domain, [nx], n_particles,
 
 ### Allocate electrostatic fields and Maxwell solver
 
-```julia
+```julia:./code_gempic/cell6
 rho = zeros(Float64, nx)
 efield_poisson = zeros(Float64, nx)
 
@@ -73,22 +73,27 @@ solve_poisson!( efield_poisson, particle_group,
 
 ### Charge density
 
-```julia
+```julia:./code_gempic/cell7
 xg = LinRange(xmin, xmax, nx)
 sval = eval_uniform_periodic_spline_curve(spline_degree-1, rho)
-plot( xg, sval, label="ρ")
+plot( xg, sval, label="rho")
+savefig(joinpath(@OUTPUT, "gempic1.svg")) # hide
 ```
+
+\fig{./code_gempic/gempic1}
 
 ### Electric field 
 
-```julia
+```julia:./code_gempic/cell8
 sval = eval_uniform_periodic_spline_curve(spline_degree-1, efield_poisson)
 plot( xg, sval, label="efield")       
+savefig(joinpath(@OUTPUT, "gempic2.svg")) # hide
 ```
+\fig{./code_gempic/gempic2}
 
 ### Initialize the arrays for the spline coefficients of the fields
 
-```julia
+```julia:./code_gempic/cell9
 efield_dofs = [copy(efield_poisson), zeros(Float64, nx)]
 bfield_dofs = zeros(Float64, nx)
     
@@ -108,7 +113,7 @@ thdiag = TimeHistoryDiagnostics( particle_group, maxwell_solver,
 
 ### Loop over time
 
-```julia
+```julia:./code_gempic/main_loop
 steps, Δt = 500, 0.05
 
 @showprogress 1 for j = 1:steps # loop over time
@@ -129,9 +134,12 @@ end
 
 ### Diagnostics stored in a dataframe
 
-```julia
+```julia:./code_gempic/diagnostics
 using DataFrames
 first(thdiag.data, 5)
 
 plot(thdiag.data[!,:Time], log.(thdiag.data[!,:PotentialEnergyE1]))
+savefig(joinpath(@OUTPUT, "gempic3.svg")) # hide
 ```
+
+\fig{./code_gempic/gempic3}

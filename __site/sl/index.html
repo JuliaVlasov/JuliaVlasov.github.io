@@ -25,9 +25,8 @@ B_{i,p}(x) := \frac{x - t_i}{t_{i+p} - t_i} B_{i,p-1}(x)
        w1 = (x - j - <span class=hljs-number >1</span>) / p
    <span class=hljs-keyword >end</span>
    <span class=hljs-keyword >return</span> (w * bspline(p - <span class=hljs-number >1</span>, j, x) + (<span class=hljs-number >1</span> - w1) * bspline(p - <span class=hljs-number >1</span>, j + <span class=hljs-number >1</span>, x))
-<span class=hljs-keyword >end</span>
-
-<span class=hljs-string >"""
+<span class=hljs-keyword >end</span></code></pre>
+<pre><code class="julia hljs"><span class=hljs-string >"""
     UniformMesh(xmin, xmax, nx)
 
 1D uniform mesh data
@@ -43,12 +42,8 @@ B_{i,p}(x) := \frac{x - t_i}{t_{i+p} - t_i} B_{i,p-1}(x)
       x  = range(xmin, stop=xmax, length=nx+<span class=hljs-number >1</span>)[<span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>-<span class=hljs-number >1</span>]     
       new( xmin, xmax, nx, dx, x)
    <span class=hljs-keyword >end</span>
-<span class=hljs-keyword >end</span>
-
-mesh = UniformMesh(-<span class=hljs-literal >π</span>, <span class=hljs-literal >π</span>, <span class=hljs-number >10</span>)
-mesh.dx, mesh.nx
-
-<span class=hljs-string >"""
+<span class=hljs-keyword >end</span></code></pre>
+<pre><code class="julia hljs"><span class=hljs-string >"""
     advection!(f, p, mesh, v, dt)
 
 function to advect the distribution function `f` with velocity `v`
@@ -195,15 +190,16 @@ compute Ex using that -ik*Ex = rho
                   
   ℰ
 
-<span class=hljs-keyword >end</span>
-
-nt = <span class=hljs-number >1000</span>
+<span class=hljs-keyword >end</span></code></pre>
+<h2 id=run_the_simulation ><a href="/sl/index.html#run_the_simulation">Run the simulation</a></h2>
+<pre><code class="julia hljs">nt = <span class=hljs-number >1000</span>
 tf = <span class=hljs-number >100.0</span>
 t  = range(<span class=hljs-number >0.0</span>, stop=tf, length=nt)
 <span class=hljs-meta >@time</span> nrj = landau_damping(tf, nt);
 
 plot( t, nrj; label = <span class=hljs-string >"E"</span>)
 plot!(t, -<span class=hljs-number >0.1533</span>*t.-<span class=hljs-number >5.50</span>; label=<span class=hljs-string >"-0.1533t.-5.5"</span>)</code></pre>
+<img src="/assets/sl/code_sl/output/landau1.svg" alt="">
 <h1 id=callable_type ><a href="/sl/index.html#callable_type">Callable type</a></h1>
 <pre><code class="julia hljs"><span class=hljs-string >"""
     Advection(f, p, mesh, v, nv, dt)
@@ -321,6 +317,7 @@ t  = range(<span class=hljs-number >0.0</span>, stop=tf, length=nt)
 
 plot( t, nrj; label = <span class=hljs-string >"E"</span>)
 plot!(t, -<span class=hljs-number >0.1533</span>*t.-<span class=hljs-number >5.50</span>; label=<span class=hljs-string >"-0.1533t.-5.5"</span>)</code></pre>
+<img src="/assets/sl/code_sl/output/landau2.svg" alt="">
 <h2 id=metaprogramming ><a href="/sl/index.html#metaprogramming">Metaprogramming</a></h2>
 <pre><code class="julia hljs"><span class=hljs-string >"""
 
@@ -403,7 +400,8 @@ tf = <span class=hljs-number >100.0</span>
 t  = range(<span class=hljs-number >0.0</span>, stop=tf, length=nt)
 <span class=hljs-meta >@time</span> nrj = landau_with_macro(tf, nt);
 plot( t, nrj; label = <span class=hljs-string >"E"</span>)
-plot!(t, -<span class=hljs-number >0.1533</span>*t.-<span class=hljs-number >5.50</span>; label=<span class=hljs-string >"-0.1533t.-5.5"</span>)</code></pre></p>
+plot!(t, -<span class=hljs-number >0.1533</span>*t.-<span class=hljs-number >5.50</span>; label=<span class=hljs-string >"-0.1533t.-5.5"</span>)</code></pre>
+<img src="/assets/sl/code_sl/output/landau3.svg" alt=""></p>
 
 <div class=page-foot >
   <div class=copyright >

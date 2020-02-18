@@ -27,7 +27,7 @@ The classical semi-Lagrangian method is based on a backtracking of characteristi
 
 *[Eric Sonnendrücker - Numerical methods for the Vlasov equations](http://www-m16.ma.tum.de/foswiki/pub/M16/Allgemeines/NumMethVlasov/Num-Meth-Vlasov-Notes.pdf)*
 
-```julia
+```julia:./code_sl/cell1
 using Plots, FFTW, LinearAlgebra, Statistics, BenchmarkTools
 ```
 
@@ -53,7 +53,7 @@ B_{i,p}(x) := \frac{x - t_i}{t_{i+p} - t_i} B_{i,p-1}(x)
 + \frac{t_{i+p+1} - x}{t_{i+p+1} - t_{i+1}} B_{i+1,p-1}(x).
 $$
 
-```julia
+```julia:./code_sl/cell2
 function bspline(p::Int, j::Int, x::Float64)
    if p == 0
        if j == 0
@@ -67,7 +67,9 @@ function bspline(p::Int, j::Int, x::Float64)
    end
    return (w * bspline(p - 1, j, x) + (1 - w1) * bspline(p - 1, j + 1, x))
 end
+```
 
+```julia:./code_sl/cell3
 """
     UniformMesh(xmin, xmax, nx)
 
@@ -85,10 +87,10 @@ struct UniformMesh
       new( xmin, xmax, nx, dx, x)
    end
 end
+```
 
-mesh = UniformMesh(-π, π, 10)
-mesh.dx, mesh.nx
 
+```julia:./code_sl/cell4
 """
     advection!(f, p, mesh, v, dt)
 
@@ -151,7 +153,7 @@ $$
 
 - [Vlasov Equation - Wikipedia](https://en.wikipedia.org/wiki/Vlasov_equation)
 
-```julia
+```julia:./code_sl/cell5
 """
     compute_rho(meshv, f)
 
@@ -188,7 +190,7 @@ end
 [Landau damping - Wikipedia](https://en.wikipedia.org/wiki/Landau_damping)
 
 
-```julia
+```julia:./code_sl/cell6
 function landau( ϵ, kx, meshx, meshv)
     nx = meshx.nx
     nv = meshv.nx
@@ -248,7 +250,11 @@ function landau_damping(tf::Float64, nt::Int64)
   ℰ
 
 end
+```
 
+## Run the simulation
+
+```julia:./code_sl/cell7
 nt = 1000
 tf = 100.0
 t  = range(0.0, stop=tf, length=nt)
@@ -256,11 +262,14 @@ t  = range(0.0, stop=tf, length=nt)
 
 plot( t, nrj; label = "E")
 plot!(t, -0.1533*t.-5.50; label="-0.1533t.-5.5")
+savefig(joinpath(@OUTPUT, "landau1.svg")) # hide
 ```
+
+\fig{./code_sl/landau1}
 
 # Callable type
 
-```julia
+```julia:./code_sl/cell8
 """
     Advection(f, p, mesh, v, nv, dt)
 
@@ -377,11 +386,14 @@ t  = range(0.0, stop=tf, length=nt)
 
 plot( t, nrj; label = "E")
 plot!(t, -0.1533*t.-5.50; label="-0.1533t.-5.5")
+savefig(joinpath(@OUTPUT, "landau2.svg")) # hide
 ```
+
+\fig{./code_sl/landau2}
 
 ## Metaprogramming
 
-```julia
+```julia:./code_sl/cell9
 
 """
 
@@ -465,4 +477,7 @@ t  = range(0.0, stop=tf, length=nt)
 @time nrj = landau_with_macro(tf, nt);
 plot( t, nrj; label = "E")
 plot!(t, -0.1533*t.-5.50; label="-0.1533t.-5.5")
+savefig(joinpath(@OUTPUT, "landau3.svg")) # hide
 ```
+
+\fig{./code_sl/landau3}
