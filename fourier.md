@@ -177,7 +177,7 @@ end
 ```
 
 $$
-f(x,v) = \frac{1}{\sqrt{2\pi}}(1+ ϵ \cdot cos(kₓ x)) e^{-v^2/2}
+f(x,v) = \frac{1}{\sqrt{2\pi}}(1+ ϵ \cdot cos(k_x x)) e^{-v^2/2}
 $$
 
 ```julia:./code_fourier/cell8
