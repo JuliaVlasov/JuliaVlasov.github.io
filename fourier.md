@@ -39,7 +39,7 @@ $$f_{n+1}(\upsilon_j) = f^n_k(\upsilon_j), E^{n+1}_k = E^n_k$$.
 
 - Perform inverse discrete Fourier transform of $E^{n+1}_k$ and for each $j$ of $f^{n+1}_k (\upsilon_j)$.
 
-```julia
+```julia:./code_fourier/cell1
 using ProgressMeter, FFTW, Plots, LinearAlgebra
 using BenchmarkTools, Statistics
 ```
@@ -48,7 +48,7 @@ UniformMesh(start, stop, length)
 
 1D uniform mesh data.
 
-```julia
+```julia:./code_fourier/cell2
 struct UniformMesh
 
    start    :: Float64
@@ -77,7 +77,7 @@ Compute charge density
 
 return ρ - ρ̄ 
 
-```julia
+```julia:./code_fourier/cell3
 function compute_rho(meshv::UniformMesh, f)
 
    dv  = meshv.step
@@ -89,7 +89,7 @@ end
 
 compute electric field from ρ
 
-```julia
+```julia:./code_fourier/cell4
 function compute_e(mesh::UniformMesh, ρ)
 
    n = mesh.length
@@ -103,13 +103,13 @@ function compute_e(mesh::UniformMesh, ρ)
 end
 ```
 
-    advection! = AmpereAdvection( mesh ) 
+advection! = AmpereAdvection( mesh ) 
 
-    ∂f/∂t − v ∂f/∂x  = 0
-    ∂E/∂t = −J = ∫ fv dv
-    ∂f/∂t − E(x) ∂f/∂v  = 0
+∂f/∂t − v ∂f/∂x  = 0
+∂E/∂t = −J = ∫ fv dv
+∂f/∂t − E(x) ∂f/∂v  = 0
 
-```julia
+```julia:./code_fourier/cell5
 struct AmpereAdvection 
     
     mesh :: UniformMesh
@@ -129,15 +129,13 @@ struct AmpereAdvection
 end
 ```
 
-```julia
-"""
-    Advection function along v
+Advection function along v
 
 $$
 \frac{df}{dt} = e \frac{df}{dv}
 $$
 
-"""
+```julia:./code_fourier/cell6
 function (adv :: AmpereAdvection)( fᵗ  :: Array{ComplexF64,2}, 
                                    e   :: Vector{ComplexF64}, 
                                    dt  :: Float64 )
@@ -146,16 +144,16 @@ function (adv :: AmpereAdvection)( fᵗ  :: Array{ComplexF64,2},
     ifft!(fᵗ, 1)
 
 end
+```
 
-"""
-    Advection function along x and e computation
+Advection function along x and e computation
 
 $$
 \frac{df}{dt} = v \frac{df}{dx}
 \frac{\partial E}{\partial t} = \int fv \; dv
 $$
 
-"""
+```julia:./code_fourier/cell7
 function (adv :: AmpereAdvection)( f   :: Array{ComplexF64,2}, 
                                    e   :: Vector{ComplexF64}, 
                                    v   :: Vector{Float64}, 
@@ -181,7 +179,7 @@ $$
 f(x,v) = \frac{1}{\sqrt{2\pi}}(1+ ϵ \cdot cos(kₓ x)) e^{-v^2/2}
 $$
 
-```julia
+```julia:./code_fourier/cell8
 """
 Landau damping initialisation function
 
@@ -242,7 +240,11 @@ function vlasov_ampere( nx, nv, xmin, xmax, vmin, vmax , tf, nt)
     end
     real(f), nrj
 end
+```
 
+## Run the simulation
+
+```julia:./code_fourier/cell9
 nx, nv = 256, 256
 xmin, xmax =  0., 4*π
 vmin, vmax = -6., 6.
@@ -252,4 +254,8 @@ t =  range(0,stop=tf,length=nt)
 plot(t, -0.1533*t.-5.48)
 f, nrj = vlasov_ampere(nx, nv, xmin, xmax, vmin, vmax, tf, nt)
 plot!(t, nrj , label=:ampere )
+plot!(size=(900,600)) # hide
+savefig(joinpath(@OUTPUT, "ampere.svg")) # hide
 ```
+
+\fig{./code_fourier/ampere}

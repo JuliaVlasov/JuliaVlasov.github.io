@@ -5,14 +5,14 @@
    stop     :: <span class=hljs-built_in >Float64</span>
    length   :: <span class=hljs-built_in >Int64</span>
    step     :: <span class=hljs-built_in >Float64</span>
-   points   :: <span class=hljs-built_in >Vector</span>&amp;<span class=hljs-comment >#123;Float64&amp;#125;</span>
+   points   :: <span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >Float64</span>}
 
-   <span class=hljs-keyword >function</span> UniformMesh&amp;<span class=hljs-comment >#40;start, stop, length::Int; endpoint&amp;#61;true&amp;#41;</span>
+   <span class=hljs-keyword >function</span> UniformMesh(start, stop, length::<span class=hljs-built_in >Int</span>; endpoint=<span class=hljs-literal >true</span>)
 
-       points &amp;<span class=hljs-comment >#61; range&amp;#40;start, stop&amp;#61;stop, length&amp;#61;length&amp;#43;1&amp;#41;&amp;#91;1:end-1&amp;#93;</span>
-       step &amp;<span class=hljs-comment >#61; &amp;#40;stop - start&amp;#41; / length</span>
+       points = range(start, stop=stop, length=length+<span class=hljs-number >1</span>)[<span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>-<span class=hljs-number >1</span>]
+       step = (stop - start) / length
 
-       new&amp;<span class=hljs-comment >#40; start, stop, length, step, points&amp;#41;</span>
+       new( start, stop, length, step, points)
 
    <span class=hljs-keyword >end</span>
 
@@ -32,13 +32,7 @@
    ρ̂ = fft(ρ)./modes
    vec(real(ifft(-<span class=hljs-number >1</span><span class=hljs-literal >im</span> .* ρ̂)))
 
-<span class=hljs-keyword >end</span></code></pre> <pre><code class="julia hljs">advection! = AmpereAdvection( mesh ) 
-
-∂f/∂t − v ∂f/∂x  = <span class=hljs-number >0</span>
-∂E/∂t = −J = ∫ fv dv
-∂f/∂t − E(x) ∂f/∂v  = <span class=hljs-number >0</span></code></pre><pre><code class="julia hljs">∂f/∂t − v ∂f/∂x  = <span class=hljs-number >0</span>
-∂E/∂t = −J = ∫ fv dv
-∂f/∂t − E(x) ∂f/∂v  = <span class=hljs-number >0</span></code></pre> <pre><code class="julia hljs"><span class=hljs-keyword >struct</span> AmpereAdvection 
+<span class=hljs-keyword >end</span></code></pre> <p>advection&#33; &#61; AmpereAdvection&#40; mesh &#41; </p> <p>∂f/∂t − v ∂f/∂x &#61; 0 ∂E/∂t &#61; −J &#61; ∫ fv dv ∂f/∂t − E&#40;x&#41; ∂f/∂v &#61; 0</p> <pre><code class="julia hljs"><span class=hljs-keyword >struct</span> AmpereAdvection 
     
     mesh :: UniformMesh
     kx   :: <span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >Float64</span>}
@@ -54,33 +48,14 @@
       
     <span class=hljs-keyword >end</span>
 
-<span class=hljs-keyword >end</span></code></pre> <pre><code class="julia hljs"><span class=hljs-string >"""
-    Advection function along v
-
-$$
-\frac{df}{dt} = e \frac{df}{dv}
-$$
-
-"""</span>
-<span class=hljs-keyword >function</span> (adv :: AmpereAdvection)( fᵗ  :: <span class=hljs-built_in >Array</span>{ComplexF64,<span class=hljs-number >2</span>}, 
+<span class=hljs-keyword >end</span></code></pre> <p>Advection function along v</p> <span class=katex-display ><span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mi>d</mi><mi>f</mi></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac><mo>=</mo><mi>e</mi><mfrac><mrow><mi>d</mi><mi>f</mi></mrow><mrow><mi>d</mi><mi>v</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex"> \frac{df}{dt} = e \frac{df}{dv} </annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:2.0574399999999997em;vertical-align:-0.686em;"></span><span class=mord ><span class="mopen nulldelimiter"></span><span class=mfrac ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:1.3714399999999998em;"><span style="top:-2.314em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class="mord mathdefault">d</span><span class="mord mathdefault">t</span></span></span><span style="top:-3.23em;"><span class=pstrut  style="height:3em;"></span><span class=frac-line  style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class=mspace  style="margin-right:0.2777777777777778em;"></span><span class=mrel >=</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span></span><span class=base ><span class=strut  style="height:2.0574399999999997em;vertical-align:-0.686em;"></span><span class="mord mathdefault">e</span><span class=mord ><span class="mopen nulldelimiter"></span><span class=mfrac ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:1.3714399999999998em;"><span style="top:-2.314em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span></span></span><span style="top:-3.23em;"><span class=pstrut  style="height:3em;"></span><span class=frac-line  style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span> <pre><code class="julia hljs"><span class=hljs-keyword >function</span> (adv :: AmpereAdvection)( fᵗ  :: <span class=hljs-built_in >Array</span>{ComplexF64,<span class=hljs-number >2</span>}, 
                                    <span class=hljs-literal >e</span>   :: <span class=hljs-built_in >Vector</span>{ComplexF64}, 
                                    dt  :: <span class=hljs-built_in >Float64</span> )
     fft!(fᵗ, <span class=hljs-number >1</span>)
     fᵗ .= fᵗ .* exp.(-<span class=hljs-number >1</span><span class=hljs-literal >im</span> * dt * adv.kx * transpose(<span class=hljs-literal >e</span>))
     ifft!(fᵗ, <span class=hljs-number >1</span>)
 
-<span class=hljs-keyword >end</span>
-
-<span class=hljs-string >"""
-    Advection function along x and e computation
-
-$$
-\frac{df}{dt} = v \frac{df}{dx}
-\frac{\partial E}{\partial t} = \int fv \; dv
-$$
-
-"""</span>
-<span class=hljs-keyword >function</span> (adv :: AmpereAdvection)( f   :: <span class=hljs-built_in >Array</span>{ComplexF64,<span class=hljs-number >2</span>}, 
+<span class=hljs-keyword >end</span></code></pre> <p>Advection function along x and e computation</p> <span class=katex-display ><span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mi>d</mi><mi>f</mi></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac><mo>=</mo><mi>v</mi><mfrac><mrow><mi>d</mi><mi>f</mi></mrow><mrow><mi>d</mi><mi>x</mi></mrow></mfrac><mfrac><mrow><mi mathvariant=normal >∂</mi><mi>E</mi></mrow><mrow><mi mathvariant=normal >∂</mi><mi>t</mi></mrow></mfrac><mo>=</mo><mo>∫</mo><mi>f</mi><mi>v</mi><mtext> </mtext><mi>d</mi><mi>v</mi></mrow><annotation encoding="application/x-tex"> \frac{df}{dt} = v \frac{df}{dx} \frac{\partial E}{\partial t} = \int fv \; dv </annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:2.0574399999999997em;vertical-align:-0.686em;"></span><span class=mord ><span class="mopen nulldelimiter"></span><span class=mfrac ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:1.3714399999999998em;"><span style="top:-2.314em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class="mord mathdefault">d</span><span class="mord mathdefault">t</span></span></span><span style="top:-3.23em;"><span class=pstrut  style="height:3em;"></span><span class=frac-line  style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class=mspace  style="margin-right:0.2777777777777778em;"></span><span class=mrel >=</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span></span><span class=base ><span class=strut  style="height:2.05744em;vertical-align:-0.686em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class=mord ><span class="mopen nulldelimiter"></span><span class=mfrac ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:1.3714399999999998em;"><span style="top:-2.314em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class="mord mathdefault">d</span><span class="mord mathdefault">x</span></span></span><span style="top:-3.23em;"><span class=pstrut  style="height:3em;"></span><span class=frac-line  style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class=mord ><span class="mopen nulldelimiter"></span><span class=mfrac ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:1.37144em;"><span style="top:-2.314em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class=mord  style="margin-right:0.05556em;">∂</span><span class="mord mathdefault">t</span></span></span><span style="top:-3.23em;"><span class=pstrut  style="height:3em;"></span><span class=frac-line  style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class=mord  style="margin-right:0.05556em;">∂</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class=mspace  style="margin-right:0.2777777777777778em;"></span><span class=mrel >=</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span></span><span class=base ><span class=strut  style="height:2.22225em;vertical-align:-0.86225em;"></span><span class="mop op-symbol large-op" style="margin-right:0.44445em;position:relative;top:-0.0011249999999999316em;">∫</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span></span></span></span></span> <pre><code class="julia hljs"><span class=hljs-keyword >function</span> (adv :: AmpereAdvection)( f   :: <span class=hljs-built_in >Array</span>{ComplexF64,<span class=hljs-number >2</span>}, 
                                    <span class=hljs-literal >e</span>   :: <span class=hljs-built_in >Vector</span>{ComplexF64}, 
                                    v   :: <span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >Float64</span>}, 
                                    dt  :: <span class=hljs-built_in >Float64</span> )
@@ -157,9 +132,7 @@ Landau damping initialisation function
         
     <span class=hljs-keyword >end</span>
     real(f), nrj
-<span class=hljs-keyword >end</span>
-
-nx, nv = <span class=hljs-number >256</span>, <span class=hljs-number >256</span>
+<span class=hljs-keyword >end</span></code></pre> <h2 id=run_the_simulation ><a href="/fourier/index.html#run_the_simulation">Run the simulation</a></h2> <pre><code class="julia hljs">nx, nv = <span class=hljs-number >256</span>, <span class=hljs-number >256</span>
 xmin, xmax =  <span class=hljs-number >0.</span>, <span class=hljs-number >4</span>*<span class=hljs-literal >π</span>
 vmin, vmax = -<span class=hljs-number >6.</span>, <span class=hljs-number >6.</span>
 tf = <span class=hljs-number >60</span>
@@ -167,4 +140,4 @@ nt = <span class=hljs-number >600</span>
 t =  range(<span class=hljs-number >0</span>,stop=tf,length=nt)
 plot(t, -<span class=hljs-number >0.1533</span>*t.-<span class=hljs-number >5.48</span>)
 f, nrj = vlasov_ampere(nx, nv, xmin, xmax, vmin, vmax, tf, nt)
-plot!(t, nrj , label=:ampere )</code></pre></p> <div class=page-foot > <div class=copyright > &copy; Pierre Navaro. Last modified: February 18, 2020. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>. </div> </div> </div> </div>
+plot!(t, nrj , label=:ampere )</code></pre> <img src="/assets/fourier/code_fourier/output/ampere.svg" alt=""></p> <div class=page-foot > <div class=copyright > &copy; Pierre Navaro. Last modified: February 18, 2020. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>. </div> </div> </div> </div>
