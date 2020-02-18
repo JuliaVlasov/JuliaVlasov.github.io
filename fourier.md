@@ -42,12 +42,13 @@ $$f_{n+1}(\upsilon_j) = f^n_k(\upsilon_j), E^{n+1}_k = E^n_k$$.
 ```julia
 using ProgressMeter, FFTW, Plots, LinearAlgebra
 using BenchmarkTools, Statistics
+```
 
-"""
-    UniformMesh(start, stop, length)
+UniformMesh(start, stop, length)
 
-    1D uniform mesh data.
-"""
+1D uniform mesh data.
+
+```julia
 struct UniformMesh
 
    start    :: Float64
@@ -66,18 +67,17 @@ struct UniformMesh
    end
 
 end
+```
 
-"""
+compute_rho( mesh, f)
 
-    compute_rho( mesh, f)
+Compute charge density
 
-    Compute charge density
+ρ(x,t) = ∫ f(x,v,t) dv
 
-    ρ(x,t) = ∫ f(x,v,t) dv
+return ρ - ρ̄ 
 
-    return ρ - ρ̄ 
-
-"""
+```julia
 function compute_rho(meshv::UniformMesh, f)
 
    dv  = meshv.step
@@ -85,10 +85,11 @@ function compute_rho(meshv::UniformMesh, f)
    ρ .- mean(ρ)
    
 end
+```
 
-"""
 compute electric field from ρ
-"""
+
+```julia
 function compute_e(mesh::UniformMesh, ρ)
 
    n = mesh.length
@@ -100,8 +101,7 @@ function compute_e(mesh::UniformMesh, ρ)
    vec(real(ifft(-1im .* ρ̂)))
 
 end
-
-"""
+```
 
     advection! = AmpereAdvection( mesh ) 
 
@@ -109,7 +109,7 @@ end
     ∂E/∂t = −J = ∫ fv dv
     ∂f/∂t − E(x) ∂f/∂v  = 0
 
-"""
+```julia
 struct AmpereAdvection 
     
     mesh :: UniformMesh
@@ -127,7 +127,9 @@ struct AmpereAdvection
     end
 
 end
+```
 
+```julia
 """
     Advection function along v
 
@@ -173,16 +175,18 @@ function (adv :: AmpereAdvection)( f   :: Array{ComplexF64,2},
     ifft!(e)
     e .= real(e)
 end
+```
 
+$$
+f(x,v) = \frac{1}{\sqrt{2\pi}}(1+ ϵ \cdot cos(kₓ x)) e^{-v^2/2}
+$$
 
+```julia
 """
 Landau damping initialisation function
 
 [Wikipedia](https://en.wikipedia.org/wiki/Landau_damping)
 
-$$
-f(x,v) = \frac{1}{\sqrt{2\pi}}(1+ ϵ \cdot cos(kₓ x)) e^{-v^2/2}
-$$
 
 """
 function landau( ϵ, kx, x, v )
