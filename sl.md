@@ -40,18 +40,18 @@ nodes of degree p with support starting at j.
 Implemented recursively using the 
 [De Boor's Algorithm](https://en.wikipedia.org/wiki/De_Boor%27s_algorithm)
 
-```math
-B_{i,0}(x) := \\left\\{
-\\begin{matrix}
-1 & \\mathrm{if}  \\quad t_i ≤ x < t_{i+1} \\\\
-0 & \\mathrm{otherwise} 
-\\end{matrix}
-\\right.
+$$
+B_{i,0}(x) := \left\{ \begin{matrix}
+1 & \mathrm{if}  \quad t_i ≤ x < t_{i+1} \\
+0 & \mathrm{otherwise} 
+\end{matrix}
+\right.
+$$
 
-```math
-B_{i,p}(x) := \\frac{x - t_i}{t_{i+p} - t_i} B_{i,p-1}(x) 
-+ \\frac{t_{i+p+1} - x}{t_{i+p+1} - t_{i+1}} B_{i+1,p-1}(x).
-```
+$$
+B_{i,p}(x) := \frac{x - t_i}{t_{i+p} - t_i} B_{i,p-1}(x) 
++ \frac{t_{i+p+1} - x}{t_{i+p+1} - t_{i+1}} B_{i+1,p-1}(x).
+$$
 
 ```julia
 function bspline(p::Int, j::Int, x::Float64)
