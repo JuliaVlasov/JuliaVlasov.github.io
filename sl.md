@@ -4,7 +4,7 @@
 @def rss_title = "More goodies"
 @def rss_pubdate = Date(2019, 5, 1)
 
-**This a draft with some ideas to build a SemiLagrangian package.**
+**This is a draft with some ideas for a SemiLagrangian package.**
 
 
 ## Semi-Lagrangian method
