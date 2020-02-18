@@ -1,0 +1,424 @@
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/libs/katex/katex.min.css"> <link rel=stylesheet  href="/libs/highlight/github.min.css"> <link rel=stylesheet  href="/css/franklin.css"> <link rel=stylesheet  href="/css/poole_hyde.css"> <style> html {font-size: 17px;} .franklin-content {position: relative; padding-left: 8%; padding-right: 5%; line-height: 1.35em;} @media (min-width: 940px) { .franklin-content {width: 100%; margin-left: auto; margin-right: auto;} } @media (max-width: 768px) { .franklin-content {padding-left: 6%; padding-right: 6%;} } </style> <link rel=icon  href="/assets/favicon.png"> <title>Semi Lagrangian</title> <div class=sidebar > <div class="container sidebar-sticky"> <div class=sidebar-about > <h1><a href="/">Julia Vlasov</a></h1> <p class=lead >Packages.</p> </div> <nav class=sidebar-nav > <a class="sidebar-nav-item " href="/">Home</a> <a class="sidebar-nav-item " href="/gempic/">GEMPIC</a> <a class="sidebar-nav-item " href="/sl/">SemiLagrangian</a> <a class="sidebar-nav-item " href="/fourier/">FourierAdvections</a> </nav> <p>&copy; Pierre Navaro.</p> </div> </div> <div class="content container"> <div class=franklin-content > <p><strong>This a draft with some ideas to build a SemiLagrangian package.</strong></p> <h2 id=semi-lagrangian_method ><a href="/sl/index.html#semi-lagrangian_method">Semi-Lagrangian method</a></h2> <p>Let us consider an abstract scalar advection equation of the form <span class=katex-display ><span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mi mathvariant=normal >∂</mi><mi>f</mi></mrow><mrow><mi mathvariant=normal >∂</mi><mi>t</mi></mrow></mfrac><mo>+</mo><mi>a</mi><mo stretchy=false >(</mo><mi>x</mi><mo separator=true >,</mo><mi>t</mi><mo stretchy=false >)</mo><mo>⋅</mo><mi mathvariant=normal >∇</mi><mi>f</mi><mo>=</mo><mn>0.</mn></mrow><annotation encoding="application/x-tex"> \frac{\partial f}{\partial t}+ a(x, t) \cdot \nabla f = 0. </annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:2.0574399999999997em;vertical-align:-0.686em;"></span><span class=mord ><span class="mopen nulldelimiter"></span><span class=mfrac ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:1.3714399999999998em;"><span style="top:-2.314em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class=mord  style="margin-right:0.05556em;">∂</span><span class="mord mathdefault">t</span></span></span><span style="top:-3.23em;"><span class=pstrut  style="height:3em;"></span><span class=frac-line  style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class=mord  style="margin-right:0.05556em;">∂</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class=mspace  style="margin-right:0.2222222222222222em;"></span><span class=mbin >+</span><span class=mspace  style="margin-right:0.2222222222222222em;"></span></span><span class=base ><span class=strut  style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">a</span><span class=mopen >(</span><span class="mord mathdefault">x</span><span class=mpunct >,</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">t</span><span class=mclose >)</span><span class=mspace  style="margin-right:0.2222222222222222em;"></span><span class=mbin >⋅</span><span class=mspace  style="margin-right:0.2222222222222222em;"></span></span><span class=base ><span class=strut  style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class=mord >∇</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span><span class=mrel >=</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span></span><span class=base ><span class=strut  style="height:0.64444em;vertical-align:0em;"></span><span class=mord >0</span><span class=mord >.</span></span></span></span></span> The characteristic curves associated to this equation are the solutions of the ordinary differential equations <span class=katex-display ><span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mi>d</mi><mi>X</mi></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac><mo>=</mo><mi>a</mi><mo stretchy=false >(</mo><mi>X</mi><mo stretchy=false >(</mo><mi>t</mi><mo stretchy=false >)</mo><mo separator=true >,</mo><mi>t</mi><mo stretchy=false >)</mo></mrow><annotation encoding="application/x-tex"> \frac{dX}{dt} = a(X(t), t) </annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:2.05744em;vertical-align:-0.686em;"></span><span class=mord ><span class="mopen nulldelimiter"></span><span class=mfrac ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:1.37144em;"><span style="top:-2.314em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class="mord mathdefault">d</span><span class="mord mathdefault">t</span></span></span><span style="top:-3.23em;"><span class=pstrut  style="height:3em;"></span><span class=frac-line  style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class=mspace  style="margin-right:0.2777777777777778em;"></span><span class=mrel >=</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span></span><span class=base ><span class=strut  style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">a</span><span class=mopen >(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class=mopen >(</span><span class="mord mathdefault">t</span><span class=mclose >)</span><span class=mpunct >,</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">t</span><span class=mclose >)</span></span></span></span></span> We shall denote by <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy=false >(</mo><mi>t</mi><mo separator=true >,</mo><mi>x</mi><mo separator=true >,</mo><mi>s</mi><mo stretchy=false >)</mo></mrow><annotation encoding="application/x-tex">X(t, x, s)</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class=mopen >(</span><span class="mord mathdefault">t</span><span class=mpunct >,</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">x</span><span class=mpunct >,</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">s</span><span class=mclose >)</span></span></span></span> the unique solution of this equation associated to the initial condition <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy=false >(</mo><mi>s</mi><mo stretchy=false >)</mo><mo>=</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">X(s) = x</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class=mopen >(</span><span class="mord mathdefault">s</span><span class=mclose >)</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span><span class=mrel >=</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span></span><span class=base ><span class=strut  style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">x</span></span></span></span>.</p> <p>The classical semi-Lagrangian method is based on a backtracking of characteristics. Two steps are needed to update the distribution function <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>f</mi><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">f^{n+1}</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:1.008548em;vertical-align:-0.19444em;"></span><span class=mord ><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span></span></span></span> at <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>t</mi><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">t^{n+1}</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.8141079999999999em;vertical-align:0em;"></span><span class=mord ><span class="mord mathdefault">t</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span></span></span></span> from its value <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>f</mi><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">f^n</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class=mord ><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.664392em;"><span style="top:-3.063em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span></span></span></span></span></span></span> at time <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>t</mi><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">t^n</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.664392em;vertical-align:0em;"></span><span class=mord ><span class="mord mathdefault">t</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.664392em;"><span style="top:-3.063em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span></span></span></span></span></span></span> :</p> <ol> <li><p>For each grid point <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">x_i</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.58056em;vertical-align:-0.15em;"></span><span class=mord ><span class="mord mathdefault">x</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> compute <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy=false >(</mo><msup><mi>t</mi><mi>n</mi></msup><mo separator=true >;</mo><msub><mi>x</mi><mi>i</mi></msub><mo separator=true >,</mo><msup><mi>t</mi><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msup><mo stretchy=false >)</mo></mrow><annotation encoding="application/x-tex">X(t^n; x_i, t^{n+1})</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class=mopen >(</span><span class=mord ><span class="mord mathdefault">t</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.664392em;"><span style="top:-3.063em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span></span></span></span><span class=mpunct >;</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class=mord ><span class="mord mathdefault">x</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.15em;"><span></span></span></span></span></span></span><span class=mpunct >,</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class=mord ><span class="mord mathdefault">t</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class=mclose >)</span></span></span></span> the value of the characteristic at <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>t</mi><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">t^n</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.664392em;vertical-align:0em;"></span><span class=mord ><span class="mord mathdefault">t</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.664392em;"><span style="top:-3.063em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span></span></span></span></span></span></span> which takes the value <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">x_i</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.58056em;vertical-align:-0.15em;"></span><span class=mord ><span class="mord mathdefault">x</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> at <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>t</mi><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">t^{n+1}</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.8141079999999999em;vertical-align:0em;"></span><span class=mord ><span class="mord mathdefault">t</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span></span></span></span>.</p> <li><p>As the distribution solution of first equation verifies </p> </ol> <span class=katex-display ><span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>f</mi><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msup><mo stretchy=false >(</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy=false >)</mo><mo>=</mo><msup><mi>f</mi><mi>n</mi></msup><mo stretchy=false >(</mo><mi>X</mi><mo stretchy=false >(</mo><msup><mi>t</mi><mi>n</mi></msup><mo separator=true >;</mo><msub><mi>x</mi><mi>i</mi></msub><mo separator=true >,</mo><msup><mi>t</mi><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msup><mo stretchy=false >)</mo><mo stretchy=false >)</mo><mo separator=true >,</mo></mrow><annotation encoding="application/x-tex">f^{n+1}(x_i) = f^n(X(t^n; x_i, t^{n+1})),</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:1.1141079999999999em;vertical-align:-0.25em;"></span><span class=mord ><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.864108em;"><span style="top:-3.113em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class=mopen >(</span><span class=mord ><span class="mord mathdefault">x</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.15em;"><span></span></span></span></span></span></span><span class=mclose >)</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span><span class=mrel >=</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span></span><span class=base ><span class=strut  style="height:1.1141079999999999em;vertical-align:-0.25em;"></span><span class=mord ><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.7143919999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span></span></span></span><span class=mopen >(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class=mopen >(</span><span class=mord ><span class="mord mathdefault">t</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.7143919999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span></span></span></span><span class=mpunct >;</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class=mord ><span class="mord mathdefault">x</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.15em;"><span></span></span></span></span></span></span><span class=mpunct >,</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class=mord ><span class="mord mathdefault">t</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.864108em;"><span style="top:-3.113em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class=mclose >)</span><span class=mclose >)</span><span class=mpunct >,</span></span></span></span></span> we obtain the desired value of <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>f</mi><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msup><mo stretchy=false >(</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy=false >)</mo></mrow><annotation encoding="application/x-tex">f^{n+1}(x_i)</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:1.064108em;vertical-align:-0.25em;"></span><span class=mord ><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class=mopen >(</span><span class=mord ><span class="mord mathdefault">x</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.15em;"><span></span></span></span></span></span></span><span class=mclose >)</span></span></span></span> by computing <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>f</mi><mi>n</mi></msup><mo stretchy=false >(</mo><mi>X</mi><mo stretchy=false >(</mo><msup><mi>t</mi><mi>n</mi></msup><mo separator=true >;</mo><msub><mi>x</mi><mi>i</mi></msub><mo separator=true >,</mo><msup><mi>t</mi><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msup><mo stretchy=false >)</mo></mrow><annotation encoding="application/x-tex">f^n(X(t^n;x_i,t^{n+1})</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:1.064108em;vertical-align:-0.25em;"></span><span class=mord ><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.664392em;"><span style="top:-3.063em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span></span></span></span><span class=mopen >(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class=mopen >(</span><span class=mord ><span class="mord mathdefault">t</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.664392em;"><span style="top:-3.063em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span></span></span></span><span class=mpunct >;</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class=mord ><span class="mord mathdefault">x</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.15em;"><span></span></span></span></span></span></span><span class=mpunct >,</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class=mord ><span class="mord mathdefault">t</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class=mclose >)</span></span></span></span> by interpolation as <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy=false >(</mo><msup><mi>t</mi><mi>n</mi></msup><mo separator=true >;</mo><msub><mi>x</mi><mi>i</mi></msub><mo separator=true >,</mo><msup><mi>t</mi><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msup><mo stretchy=false >)</mo></mrow><annotation encoding="application/x-tex">X(t^n; x_i, t^{n+1})</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class=mopen >(</span><span class=mord ><span class="mord mathdefault">t</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.664392em;"><span style="top:-3.063em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span></span></span></span><span class=mpunct >;</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class=mord ><span class="mord mathdefault">x</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.15em;"><span></span></span></span></span></span></span><span class=mpunct >,</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class=mord ><span class="mord mathdefault">t</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class=mclose >)</span></span></span></span> is in general not a grid point.</p> <p><em><a href="http://www-m16.ma.tum.de/foswiki/pub/M16/Allgemeines/NumMethVlasov/Num-Meth-Vlasov-Notes.pdf">Eric Sonnendrücker - Numerical methods for the Vlasov equations</a></em></p> <pre><code class=language-julia >using Plots, FFTW, LinearAlgebra, Statistics, BenchmarkTools</code></pre>
+<h2 id=bspline ><a href="/sl/index.html#bspline">Bspline</a></h2>
+<p>bspline&#40;p, j, x&#41;</p>
+<p>Return the value at x in &#91;0,1&#91; of the B-spline with integer  nodes of degree p with support starting at j. Implemented recursively using the  <a href="https://en.wikipedia.org/wiki/De_Boor&#37;27s_algorithm">De Boor&#39;s Algorithm</a></p>
+<pre><code class=language-math >B_{i,0}(x) := \\left\\{
+\\begin{matrix}
+1 & \\mathrm{if}  \\quad t_i ≤ x < t_{i+1} \\\\
+0 & \\mathrm{otherwise} 
+\\end{matrix}
+\\right.
+
+```math
+B_{i,p}(x) := \\frac{x - t_i}{t_{i+p} - t_i} B_{i,p-1}(x) 
++ \\frac{t_{i+p+1} - x}{t_{i+p+1} - t_{i+1}} B_{i+1,p-1}(x).</code></pre>
+<pre><code class=language-julia >function bspline(p::Int, j::Int, x::Float64)
+   if p == 0
+       if j == 0
+           return 1.0
+       else
+           return 0.0
+       end
+   else
+       w = (x - j) / p
+       w1 = (x - j - 1) / p
+   end
+   return (w * bspline(p - 1, j, x) + (1 - w1) * bspline(p - 1, j + 1, x))
+end
+
+"""
+    UniformMesh(xmin, xmax, nx)
+
+1D uniform mesh data
+"""
+struct UniformMesh
+   xmin  :: Float64
+   xmax  :: Float64
+   nx    :: Int
+   dx    :: Float64
+   x     :: Vector{Float64}
+   function UniformMesh(xmin, xmax, nx)
+      dx = (xmax - xmin) / nx
+      x  = range(xmin, stop=xmax, length=nx+1)[1:end-1]     
+      new( xmin, xmax, nx, dx, x)
+   end
+end
+
+mesh = UniformMesh(-π, π, 10)
+mesh.dx, mesh.nx
+
+"""
+    advection!(f, p, mesh, v, dt)
+
+function to advect the distribution function `f` with velocity `v`
+during a time step `dt`. Interpolation method uses bspline periodic.
+"""
+function advection!(f    :: Array{Complex{Float64},2}, 
+                    p    :: Int64, 
+                    mesh :: UniformMesh, 
+                    v    :: Vector{Float64}, 
+                    dt   :: Float64)
+    
+   nx = mesh.nx
+   nv = length(v)
+   dx = mesh.dx
+   modes = [2π * i / nx for i in 0:nx-1]
+    
+   # compute eigenvalues of degree p b-spline matrix
+   eig_bspl  = zeros(Float64, nx)
+   eig_bspl .= bspline(p, -div(p+1,2), 0.0)
+   for i in 1:div(p+1,2)-1
+      eig_bspl .+= bspline(p, i - (p+1)÷2, 0.0) * 2 .* cos.(i * modes)
+   end
+   eigalpha = zeros(Complex{Float64}, nx)
+    
+   fft!(f,1)
+    
+   for j in 1:nv
+      @inbounds alpha = dt * v[j] / dx
+      # compute eigenvalues of cubic splines evaluated at displaced points
+      ishift = floor(-alpha)
+      beta   = -ishift - alpha
+      fill!(eigalpha,0.0im)
+      for i in -div(p-1,2):div(p+1,2)
+         eigalpha .+= (bspline(p, i-div(p+1,2), beta) 
+                        .* exp.((ishift+i) * 1im .* modes))
+      end
+          
+      # compute interpolating spline using fft and properties of circulant matrices
+      
+      @inbounds f[:,j] .*= eigalpha ./ eig_bspl
+        
+   end
+        
+   ifft!(f,1)
+    
+end</code></pre>
+<h1 id=vlasov-poisson_equation ><a href="/sl/index.html#vlasov-poisson_equation">Vlasov-Poisson equation</a></h1>
+<p>We consider the dimensionless Vlasov-Poisson equation for one species with a neutralizing background.</p>
+<span class=katex-display ><span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mi mathvariant=normal >∂</mi><mi>f</mi></mrow><mrow><mi mathvariant=normal >∂</mi><mi>t</mi></mrow></mfrac><mo>+</mo><mi>v</mi><mo>⋅</mo><msub><mi mathvariant=normal >∇</mi><mi>x</mi></msub><mi>f</mi><mo>+</mo><mi>E</mi><mo stretchy=false >(</mo><mi>t</mi><mo separator=true >,</mo><mi>x</mi><mo stretchy=false >)</mo><mo>⋅</mo><msub><mi mathvariant=normal >∇</mi><mi>v</mi></msub><mi>f</mi><mo>=</mo><mn>0</mn><mo separator=true >,</mo><mspace linebreak=newline ></mspace><mo>−</mo><mi mathvariant=normal >Δ</mi><mi>ϕ</mi><mo>=</mo><mn>1</mn><mo>−</mo><mi>ρ</mi><mo separator=true >,</mo><mi>E</mi><mo>=</mo><mo>−</mo><mi mathvariant=normal >∇</mi><mi>ϕ</mi><mspace linebreak=newline ></mspace><mi>ρ</mi><mo stretchy=false >(</mo><mi>t</mi><mo separator=true >,</mo><mi>x</mi><mo stretchy=false >)</mo><mo>=</mo><mo>∫</mo><mi>f</mi><mo stretchy=false >(</mo><mi>t</mi><mo separator=true >,</mo><mi>x</mi><mo separator=true >,</mo><mi>v</mi><mo stretchy=false >)</mo><mi>d</mi><mi>v</mi><mi mathvariant=normal >.</mi></mrow><annotation encoding="application/x-tex"> 
+\frac{\partial f}{\partial t}+ v\cdot \nabla_x f + E(t,x) \cdot \nabla_v f = 0, \\
+- \Delta \phi = 1 - \rho, E = - \nabla \phi \\
+\rho(t,x)  =  \int f(t,x,v)dv.
+</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:2.0574399999999997em;vertical-align:-0.686em;"></span><span class=mord ><span class="mopen nulldelimiter"></span><span class=mfrac ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:1.3714399999999998em;"><span style="top:-2.314em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class=mord  style="margin-right:0.05556em;">∂</span><span class="mord mathdefault">t</span></span></span><span style="top:-3.23em;"><span class=pstrut  style="height:3em;"></span><span class=frac-line  style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class=pstrut  style="height:3em;"></span><span class=mord ><span class=mord  style="margin-right:0.05556em;">∂</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class=mspace  style="margin-right:0.2222222222222222em;"></span><span class=mbin >+</span><span class=mspace  style="margin-right:0.2222222222222222em;"></span></span><span class=base ><span class=strut  style="height:0.44445em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class=mspace  style="margin-right:0.2222222222222222em;"></span><span class=mbin >⋅</span><span class=mspace  style="margin-right:0.2222222222222222em;"></span></span><span class=base ><span class=strut  style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class=mord ><span class=mord >∇</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">x</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class=mspace  style="margin-right:0.2222222222222222em;"></span><span class=mbin >+</span><span class=mspace  style="margin-right:0.2222222222222222em;"></span></span><span class=base ><span class=strut  style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class=mopen >(</span><span class="mord mathdefault">t</span><span class=mpunct >,</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">x</span><span class=mclose >)</span><span class=mspace  style="margin-right:0.2222222222222222em;"></span><span class=mbin >⋅</span><span class=mspace  style="margin-right:0.2222222222222222em;"></span></span><span class=base ><span class=strut  style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class=mord ><span class=mord >∇</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.03588em;">v</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span><span class=mrel >=</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span></span><span class=base ><span class=strut  style="height:0.8388800000000001em;vertical-align:-0.19444em;"></span><span class=mord >0</span><span class=mpunct >,</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span></span><span class="mspace newline"></span><span class=base ><span class=strut  style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class=mord >−</span><span class=mord >Δ</span><span class="mord mathdefault">ϕ</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span><span class=mrel >=</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span></span><span class=base ><span class=strut  style="height:0.72777em;vertical-align:-0.08333em;"></span><span class=mord >1</span><span class=mspace  style="margin-right:0.2222222222222222em;"></span><span class=mbin >−</span><span class=mspace  style="margin-right:0.2222222222222222em;"></span></span><span class=base ><span class=strut  style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">ρ</span><span class=mpunct >,</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span><span class=mrel >=</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span></span><span class=base ><span class=strut  style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class=mord >−</span><span class=mord >∇</span><span class="mord mathdefault">ϕ</span></span><span class="mspace newline"></span><span class=base ><span class=strut  style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">ρ</span><span class=mopen >(</span><span class="mord mathdefault">t</span><span class=mpunct >,</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">x</span><span class=mclose >)</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span><span class=mrel >=</span><span class=mspace  style="margin-right:0.2777777777777778em;"></span></span><span class=base ><span class=strut  style="height:2.22225em;vertical-align:-0.86225em;"></span><span class="mop op-symbol large-op" style="margin-right:0.44445em;position:relative;top:-0.0011249999999999316em;">∫</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class=mopen >(</span><span class="mord mathdefault">t</span><span class=mpunct >,</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">x</span><span class=mpunct >,</span><span class=mspace  style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class=mclose >)</span><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class=mord >.</span></span></span></span></span>
+<ul>
+<li><p><a href="https://en.wikipedia.org/wiki/Vlasov_equation">Vlasov Equation - Wikipedia</a></p>
+
+</ul>
+<pre><code class=language-julia >"""
+    compute_rho(meshv, f)
+
+Compute charge density
+ρ(x,t) = ∫ f(x,v,t) dv
+"""
+function compute_rho(meshv::UniformMesh, 
+        f::Array{Complex{Float64},2})
+    
+   dv = meshv.dx
+   rho = dv * sum(real(f), dims=2)
+   vec(rho .- mean(rho)) # vec squeezes the 2d array returned by sum function
+end
+
+"""
+    compute_e(meshx, rho)
+compute Ex using that -ik*Ex = rho 
+"""
+function compute_e(meshx::UniformMesh, rho::Vector{Float64})
+   nx = meshx.nx
+   k =  2π / (meshx.xmax - meshx.xmin)
+   modes = zeros(Float64, nx)
+   modes .= k * vcat(0:div(nx,2)-1,-div(nx,2):-1)
+   modes[1] = 1.0
+   rhok = fft(rho)./modes
+   rhok .*= -1im
+   ifft!(rhok)
+   real(rhok)
+end</code></pre>
+<h1 id=landau_damping ><a href="/sl/index.html#landau_damping">Landau Damping</a></h1>
+<p><a href="https://en.wikipedia.org/wiki/Landau_damping">Landau damping - Wikipedia</a></p>
+<pre><code class=language-julia >function landau( ϵ, kx, meshx, meshv)
+    nx = meshx.nx
+    nv = meshv.nx
+    x  = meshx.x
+    v  = meshv.x
+    f  = zeros(Complex{Float64},(nx,nv))
+    f .= (1.0.+ϵ*cos.(kx*x))/sqrt(2π) .* transpose(exp.(-0.5*v.^2))
+    f
+end
+
+function advection_x!( f, p, meshx, v, dt) 
+    advection!(f, p, meshx, v, dt)
+end
+
+function advection_v!( f, fᵗ, p, meshx, meshv, ℰ, dt)
+     dx = meshx.dx
+     nx = meshx.nx
+     ρ  = compute_rho(meshv, f)
+     e  = compute_e(meshx, ρ)
+     push!(ℰ, 0.5*log(sum(e.*e)*dx))
+     transpose!(fᵗ, f)
+     advection!(fᵗ, p, meshv, e, dt)
+     transpose!(f, fᵗ)
+end
+
+function landau_damping(tf::Float64, nt::Int64)
+    
+  # Set grid
+  p = 3
+  nx, nv = 128, 256
+  xmin, xmax = 0.0, 4π
+  vmin, vmax = -6., 6.
+  meshx = UniformMesh(xmin, xmax, nx)
+  meshv = UniformMesh(vmin, vmax, nv)
+  x, v = meshx.x, meshv.x
+    
+  # Set distribution function for Landau damping
+  ϵ, kx = 0.001, 0.5
+  f = landau( ϵ, kx, meshx, meshv)
+  
+  fᵗ = zeros(Complex{Float64},(nv,nx))
+  
+  # Set time domain
+  dt = tf / nt
+  
+  # Run simulation
+  ℰ = Float64[]
+  
+  for it in 1:nt
+        
+     advection_x!( f, p, meshx, v, 0.5dt)
+     advection_v!( f, fᵗ, p, meshx, meshv, ℰ, dt)
+     advection_x!( f, p, meshx, v, 0.5dt)
+        
+  end
+                  
+  ℰ
+
+end
+
+nt = 1000
+tf = 100.0
+t  = range(0.0, stop=tf, length=nt)
+@time nrj = landau_damping(tf, nt);
+
+plot( t, nrj; label = "E")
+plot!(t, -0.1533*t.-5.50; label="-0.1533t.-5.5")</code></pre>
+<h1 id=callable_type ><a href="/sl/index.html#callable_type">Callable type</a></h1>
+<pre><code class=language-julia >"""
+    Advection(f, p, mesh, v, nv, dt)
+
+Advection type
+
+"""
+mutable struct Advection
+    
+    p        :: Int64 
+    mesh     :: UniformMesh
+    modes    :: Vector{Float64}
+    eig_bspl :: Vector{Float64}
+    eigalpha :: Vector{Complex{Float64}}
+    
+    function Advection( p, mesh )
+        nx        = mesh.nx
+        modes     = zeros(Float64, nx)
+        modes    .= [2π * i / nx for i in 0:nx-1]
+        eig_bspl  = zeros(Float64, nx)
+        eig_bspl  = zeros(Float64, nx)
+        eig_bspl .= bspline(p, -div(p+1,2), 0.0)
+        for i in 1:div(p+1,2)-1
+            eig_bspl .+= bspline(p, i-(p+1)÷2, 0.0) * 2 .* cos.(i * modes)
+        end
+        eigalpha  = zeros(Complex{Float64}, nx)
+        new( p, mesh, modes, eig_bspl, eigalpha )
+    end
+    
+end
+
+function (adv :: Advection)(f    :: Array{Complex{Float64},2}, 
+                            v    :: Vector{Float64}, 
+                            dt   :: Float64)
+    
+   nx = adv.mesh.nx
+   nv = length(v)
+   dx = adv.mesh.dx
+    
+   fft!(f,1)
+    
+   for j in 1:nv
+      @inbounds alpha = dt * v[j] / dx
+      # compute eigenvalues of cubic splines evaluated at displaced points
+      ishift = floor(-alpha)
+      beta   = -ishift - alpha
+      fill!(adv.eigalpha,0.0im)
+      for i in -div(adv.p-1,2):div(adv.p+1,2)
+         adv.eigalpha .+= (bspline(adv.p, i-div(adv.p+1,2), beta) 
+                        .* exp.((ishift+i) * 1im .* adv.modes))
+      end
+          
+      # compute interpolating spline using fft and properties of circulant matrices
+      
+      @inbounds f[:,j] .*= adv.eigalpha ./ adv.eig_bspl
+        
+   end
+        
+   ifft!(f,1)
+    
+end            
+
+function landau_damping_hl(tf::Float64, nt::Int64)
+    
+  # Set grid
+  p = 3
+  nx, nv = 128, 256
+  xmin, xmax = 0.0, 4π
+  vmin, vmax = -6., 6.
+  meshx = UniformMesh(xmin, xmax, nx)
+  meshv = UniformMesh(vmin, vmax, nv)
+  x, v = meshx.x, meshv.x    
+  dx = meshx.dx
+  
+  # Set distribution function for Landau damping
+  ϵ, kx = 0.001, 0.5
+  f = landau( ϵ, kx, meshx, meshv)
+  fᵗ = zeros(Complex{Float64},(nv,nx))
+    
+  # Instantiate advection functions
+  advection_x! = Advection(p, meshx)
+  advection_v! = Advection(p, meshv)
+  
+  # Set time step
+  dt = tf / nt
+  
+  # Run simulation
+  ℰ = Float64[]
+  
+  for it in 1:nt
+        
+       advection_x!(f, v, 0.5dt)
+
+       ρ = compute_rho(meshv, f)
+       e = compute_e(meshx, ρ)
+        
+       push!(ℰ, 0.5*log(sum(e.*e)*dx))
+        
+       transpose!(fᵗ, f)
+       advection_v!(fᵗ, e, dt)
+       transpose!(f, fᵗ)
+    
+       advection_x!(f, v, 0.5dt)
+        
+  end
+                  
+  ℰ
+
+end
+
+nt = 1000
+tf = 100.0
+t  = range(0.0, stop=tf, length=nt)
+@time nrj = landau_damping_hl(tf, nt);
+
+plot( t, nrj; label = "E")
+plot!(t, -0.1533*t.-5.50; label="-0.1533t.-5.5")</code></pre>
+<h2 id=metaprogramming ><a href="/sl/index.html#metaprogramming">Metaprogramming</a></h2>
+<pre><code class=language-julia >"""
+
+    @Strang( push_t, push_v )
+
+    Apply the second order Strang splitting
+
+    push_t and push_v are two function calls with
+    `dt` as argument.
+
+"""
+macro Strang(push_t, push_v)
+    return esc(quote
+        local full_dt = dt
+        dt = 0.5full_dt
+        $push_t
+        dt = full_dt
+        $push_v
+        dt = 0.5full_dt
+        $push_t
+        dt = full_dt
+    end)
+end
+
+function landau_with_macro(tf::Float64, nt::Int64)
+    
+  # Set grid
+  p = 3
+  nx, nv = 128, 256
+  xmin, xmax = 0.0, 4π
+  vmin, vmax = -6., 6.
+  meshx = UniformMesh(xmin, xmax, nx)
+  meshv = UniformMesh(vmin, vmax, nv)
+  x, v = meshx.x, meshv.x    
+  dx = meshx.dx
+  
+  # Set distribution function for Landau damping
+  ϵ, kx = 0.001, 0.5
+  f  = landau( ϵ, kx, meshx, meshv)
+  fᵗ = zeros(Complex{Float64},(nv,nx))
+    
+  # Instantiate distribution functions
+  advection_x! = Advection(p, meshx)
+  advection_v! = Advection(p, meshv)
+    
+  push_t!( f, v, dt ) = advection_x!(f, v, dt)
+
+  function push_v!( f, fᵗ, meshx, meshv, dt, ℰ)
+    
+      ρ = compute_rho(meshv, f)
+      e = compute_e(meshx, ρ)
+     
+      push!(ℰ, 0.5*log(sum(e.*e)*dx))
+     
+      transpose!(fᵗ, f)
+      advection_v!(fᵗ, e, dt)
+      transpose!(f, fᵗ)
+    
+  end
+  
+  # Set time step
+  dt = tf / nt
+  
+  # Run simulation
+  ℰ = Float64[]
+  
+  for it in 1:nt
+        
+       @Strang( push_t!( f, v, dt ),
+                push_v!( f, fᵗ, meshx, meshv, dt, ℰ))
+        
+  end
+                  
+  ℰ
+
+end
+
+nt = 1000
+tf = 100.0
+t  = range(0.0, stop=tf, length=nt)
+@time nrj = landau_with_macro(tf, nt);
+plot( t, nrj; label = "E")
+plot!(t, -0.1533*t.-5.50; label="-0.1533t.-5.5")</code></pre></p>
+
+<div class=page-foot >
+  <div class=copyright >
+    &copy; Pierre Navaro. Last modified: February 18, 2020. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.
+  </div>
+</div>
+
+</div>
+
+    </div>  
+    
+        
+
+
+
+    
+    
+        <script src="/libs/highlight/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();hljs.configure({tabReplace: '    '});</script>
