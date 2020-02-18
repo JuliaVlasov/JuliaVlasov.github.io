@@ -1,6 +1,8 @@
 @def title = "Solve Vlasov-Ampere system"
 @def hascode = true
 
+**This is a draft with some ideas for a FourierAdvections package.**
+
 ## 1D Vlasov–Ampere system
 
 $$
@@ -25,7 +27,7 @@ $$
     
     - Compute 
     
-    $$\rho_k^{n+1} = \Delta \upsilon \sum_j􏰄 f^{n+1}_k(\upsilon_j),$$
+    $$\rho_k^{n+1} = \Delta \upsilon \sum_j f^{n+1}_k(\upsilon_j),$$
     
     - Compute
     
