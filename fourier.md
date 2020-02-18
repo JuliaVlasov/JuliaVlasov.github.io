@@ -22,7 +22,7 @@ $$
 
     - Compute 
     
-    $$f^{n+1}_k(\upsilon_j) = e^{−2i\pi k \upsilon
+    $$f^{n+1}_k(\upsilon_j) = e^{-2i\pi k \upsilon
     \Delta t/L} f_n^k(\upsilon_j),$$
     
     - Compute 
@@ -108,7 +108,7 @@ advection! = AmpereAdvection( mesh )
 $$
 \frac{\partial f}{\partial t} - v \frac{\partial f}{\partial x}  = 0
 \frac{\partial E}{\partial t} = -J = \int fv dv
-\frac{\partial f}{\partial t} − E(x) \frac{\partial f}{\partial v}  = 0
+\frac{\partial f}{\partial t} - E(x) \frac{\partial f}{\partial v}  = 0
 $$
 
 ```julia:./code_fourier/cell5
