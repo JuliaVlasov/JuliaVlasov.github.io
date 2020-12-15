@@ -1,0 +1,87 @@
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/libs/highlight/github.min.css"> <link rel=stylesheet  href="/css/franklin.css"> <link rel=stylesheet  href="/css/poole_hyde.css"> <style> html {font-size: 17px;} .franklin-content {position: relative; padding-left: 8%; padding-right: 5%; line-height: 1.35em;} @media (min-width: 940px) { .franklin-content {width: 100%; margin-left: auto; margin-right: auto;} } @media (max-width: 768px) { .franklin-content {padding-left: 6%; padding-right: 6%;} } </style> <link rel=icon  href="/assets/favicon.png"> <title>GEMPIC</title> <div class=sidebar > <div class="container sidebar"> <div class=sidebar-about > <h1><a href="/">Julia Vlasov</a></h1> <p class=lead >Organisation for Vlasov codes in Julia</p> </div> <nav class=sidebar-nav > <a class="sidebar-nav-item " href="/">Home</a> <a class="sidebar-nav-item active" href="/gempic/">GEMPIC</a> <a class="sidebar-nav-item " href="/sl/">SemiLagrangian</a> <a class="sidebar-nav-item " href="/fourier/">FourierAdvections</a> <a class="sidebar-nav-item " href="/pages/numkin2019/">Numkin 2019</a> </nav> <p>&copy; Pierre Navaro. </p> <p><a href="https://github.com/juliavlasov"> <p><i class="fa fa-github"></i>Edit on GitHub</a>.</p> </div> </div> <div class="content container"> <div class=franklin-content ><h1 id=gempic_example ><a href="#gempic_example">GEMPIC example</a></h1> <p><a href="https://arxiv.org/abs/1609.03053">Geometric ElectroMagnetic Particle-In-Cell Methods</a></p> <p><em>Michael Kraus, Katharina Kormann, Philip J. Morrison, Eric Sonnendrücker</em></p> <p>Framework for Finite Element Particle-in-Cell methods based on the discretization of the underlying Hamiltonian structure of the Vlasov-Maxwell system. </p> <h2 id=install_the_gempic_package ><a href="#install_the_gempic_package">Install the GEMPIC package</a></h2> <pre><code class="julia hljs"><span class=hljs-keyword >using</span> ProgressMeter, Plots, GEMPIC</code></pre>
+<h2 id=strong_landau_damping ><a href="#strong_landau_damping">Strong Landau Damping</a></h2>
+<h3 id=the_physical_parameters ><a href="#the_physical_parameters">The physical parameters </a></h3>
+<pre><code class="julia hljs">kx, α = <span class=hljs-number >0.5</span>, <span class=hljs-number >0.5</span>
+xmin, xmax = <span class=hljs-number >0</span>, <span class=hljs-number >2</span><span class=hljs-literal >π</span>/kx
+domain = [xmin, xmax, xmax - xmin]</code></pre>
+<h3 id=the_numerical_parameters ><a href="#the_numerical_parameters">The numerical parameters</a></h3>
+<pre><code class="julia hljs">∆t = <span class=hljs-number >0.05</span>
+nx = <span class=hljs-number >32</span> 
+n_particles = <span class=hljs-number >100000</span>
+mesh = GEMPIC.Mesh( xmin, xmax, nx)
+spline_degree = <span class=hljs-number >3</span></code></pre>
+<h3 id=initialize_particles ><a href="#initialize_particles">Initialize particles</a></h3>
+<pre><code class="julia hljs">mass, charge = <span class=hljs-number >1.0</span>, <span class=hljs-number >1.0</span>
+particle_group = GEMPIC.ParticleGroup{<span class=hljs-number >1</span>,<span class=hljs-number >2</span>}( n_particles, mass, charge, <span class=hljs-number >1</span>)   
+sampler = LandauDamping( α, kx)
+
+sample!(sampler, particle_group)</code></pre>
+<h3 id=particle-mesh_coupling_operators ><a href="#particle-mesh_coupling_operators">Particle-mesh coupling operators</a></h3>
+<pre><code class="julia hljs">kernel_smoother1 = ParticleMeshCoupling( domain, [nx], n_particles, 
+                                         spline_degree-<span class=hljs-number >1</span>, :galerkin)    
+
+kernel_smoother0 = ParticleMeshCoupling( domain, [nx], n_particles, 
+                                         spline_degree, :galerkin)</code></pre>
+<h3 id=allocate_electrostatic_fields_and_maxwell_solver ><a href="#allocate_electrostatic_fields_and_maxwell_solver">Allocate electrostatic fields and Maxwell solver</a></h3>
+<pre><code class="julia hljs">rho = zeros(<span class=hljs-built_in >Float64</span>, nx)
+efield_poisson = zeros(<span class=hljs-built_in >Float64</span>, nx)
+
+maxwell_solver = Maxwell1DFEM(domain, nx, spline_degree)
+
+solve_poisson!( efield_poisson, particle_group, 
+                kernel_smoother0, maxwell_solver, rho)</code></pre>
+<h3 id=charge_density ><a href="#charge_density">Charge density</a></h3>
+<pre><code class="julia hljs">xg = <span class=hljs-built_in >LinRange</span>(xmin, xmax, nx)
+sval = eval_uniform_periodic_spline_curve(spline_degree-<span class=hljs-number >1</span>, rho)
+plot( xg, sval, label=<span class=hljs-string >&quot;rho&quot;</span>)</code></pre>
+<img src="/assets/gempic/code_gempic/output/gempic1.svg" alt="">
+<h3 id=electric_field ><a href="#electric_field">Electric field </a></h3>
+<pre><code class="julia hljs">sval = eval_uniform_periodic_spline_curve(spline_degree-<span class=hljs-number >1</span>, efield_poisson)
+plot( xg, sval, label=<span class=hljs-string >&quot;efield&quot;</span>)</code></pre>
+<img src="/assets/gempic/code_gempic/output/gempic2.svg" alt="">
+<h3 id=initialize_the_arrays_for_the_spline_coefficients_of_the_fields ><a href="#initialize_the_arrays_for_the_spline_coefficients_of_the_fields">Initialize the arrays for the spline coefficients of the fields</a></h3>
+<pre><code class="julia hljs">efield_dofs = [copy(efield_poisson), zeros(<span class=hljs-built_in >Float64</span>, nx)]
+bfield_dofs = zeros(<span class=hljs-built_in >Float64</span>, nx)
+    
+propagator = HamiltonianSplitting( maxwell_solver,
+                                   kernel_smoother0, 
+                                   kernel_smoother1, 
+                                   particle_group,
+                                   efield_dofs,
+                                   bfield_dofs,
+                                   domain);
+
+efield_dofs_n = propagator.e_dofs
+
+thdiag = TimeHistoryDiagnostics( particle_group, maxwell_solver, 
+                        kernel_smoother0, kernel_smoother1 );</code></pre>
+<h3 id=loop_over_time ><a href="#loop_over_time">Loop over time</a></h3>
+<pre><code class="julia hljs">steps, Δt = <span class=hljs-number >500</span>, <span class=hljs-number >0.05</span>
+
+<span class=hljs-meta >@showprogress</span> <span class=hljs-number >1</span> <span class=hljs-keyword >for</span> j = <span class=hljs-number >1</span>:steps <span class=hljs-comment ># loop over time</span>
+
+    <span class=hljs-comment >## Strang splitting</span>
+    strang_splitting!(propagator, Δt, <span class=hljs-number >1</span>)
+
+    <span class=hljs-comment >## Diagnostics</span>
+    solve_poisson!( efield_poisson, particle_group, 
+                    kernel_smoother0, maxwell_solver, rho)
+    
+    write_step!(thdiag, j * Δt, spline_degree, 
+                    efield_dofs,  bfield_dofs,
+                    efield_dofs_n, efield_poisson)
+
+<span class=hljs-keyword >end</span></code></pre>
+<h3 id=diagnostics_stored_in_a_dataframe ><a href="#diagnostics_stored_in_a_dataframe">Diagnostics stored in a dataframe</a></h3>
+<pre><code class="julia hljs"><span class=hljs-keyword >using</span> DataFrames
+first(thdiag.data, <span class=hljs-number >5</span>)
+
+plot(thdiag.data[!,:Time], log.(thdiag.data[!,:PotentialEnergyE1]))</code></pre>
+<p><span style="color:red;">// Image matching '/assets/gempic/code_gempic/gempic3' not found. //</span></p>
+<div class=page-foot >
+  <div class=copyright >
+    &copy; Pierre Navaro. Last modified: December 15, 2020. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.
+  </div>
+</div>
+</div>
+    </div>

@@ -1,0 +1,3 @@
+MethodError: no method matching GEMPIC.ParticleGroup{1,2}(::Int64, ::Float64, ::Float64, ::Int64)
+Closest candidates are:
+  GEMPIC.ParticleGroup{1,2}(::Any; charge, mass, n_weights, common_weight, n_spin) where {D, V} at /home/runner/.julia/packages/GEMPIC/Q2N0A/src/particle_group.jl:27
