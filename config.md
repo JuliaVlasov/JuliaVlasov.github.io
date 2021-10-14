@@ -2,7 +2,7 @@
 @def website_descr = "Organisation for Vlasov codes in Julia"
 @def website_url   = "https://juliavlasov.github.io"
 
-@def author = "Pierre Navaro"
+@def author = "Julia Vlasov team"
 
 <!-----------------------------------------------------
 Add here global latex commands to use throughout your
