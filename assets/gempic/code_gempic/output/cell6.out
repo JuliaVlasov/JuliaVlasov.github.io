@@ -1,3 +1,0 @@
-MethodError: no method matching GEMPIC.Maxwell1DFEM(::Array{Float64,1}, ::Int64, ::Int64)
-Closest candidates are:
-  GEMPIC.Maxwell1DFEM(!Matched::GEMPIC.Mesh, ::Int64) at /home/runner/.julia/packages/GEMPIC/Q2N0A/src/maxwell_1d_fem.jl:50

@@ -1,0 +1,53 @@
+<!DOCTYPE html><HTML lang="en"><head><script charset="utf-8" src="../../../assets/__default/flexsearch.bundle.js" type="text/javascript"></script><script charset="utf-8" src="../../../assets/__default/flexsearch_integration.js" type="text/javascript"></script><meta charset="UTF-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><title>Example · VectorSpinVlasovMaxwell1D1V.jl</title><script data-outdated-warner="" src="../assets/warner.js"></script><link href="https://JuliaVlasov.github.io/VectorSpinVlasovMaxwell1D1V.jl/example/" rel="canonical"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script data-main="../assets/documenter.js" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" data-theme-name="documenter-dark" data-theme-primary-dark="" href="../assets/themes/documenter-dark.css" rel="stylesheet" type="text/css"/><link class="docs-theme-link" data-theme-name="documenter-light" data-theme-primary="" href="../assets/themes/documenter-light.css" rel="stylesheet" type="text/css"/><script src="../assets/themeswap.js"></script><link href="../../../assets/__default/multidoc.css" rel="stylesheet" type="text/css"/><link href="../../../assets/__default/flexsearch.css" rel="stylesheet" type="text/css"/></head><body><nav id="multi-page-nav"><div class="hidden-on-mobile" id="nav-items"><a class="nav-link nav-item" href="../../../gempic/">GEMPIC</a><a class="nav-link nav-item" href="../../../semi-lagrangian/">SemiLagrangian</a><a class="nav-link nav-item" href="../../../vlasov-solvers/">VlasovSolvers</a><a class="nav-link nav-item" href="../../../scalar-spin/">SpinGEMPIC</a><a class="nav-link active nav-item" href="../../">VectorSpin</a><div class="search nav-item"><input id="search-input" placeholder="Search..."/><ul class="suggestions hidden" id="search-result-container"></ul><div class="search-keybinding">/</div></div></div><a id="multidoc-toggler"></a></nav><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">VectorSpinVlasovMaxwell1D1V.jl</a></span></div><form action="../search/" class="docs-search"><input class="docs-search-query" id="documenter-search-query" name="q" placeholder="Search docs" type="text"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../srs_without_spin/">Validation</a></li><li class="is-active"><a class="tocitem" href="">Example</a></li><li><a class="tocitem" href="../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href="">Example</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="">Example</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/JuliaVlasov/VectorSpinVlasovMaxwell1D1V.jl/blob/main/docs/src/example.md#" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" href="#" id="documenter-settings-button" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" href="#" id="documenter-sidebar-button"></a></div></header><article class="content" id="documenter-page"><h1 id="Example"><a class="docs-heading-anchor" href="#Example">Example</a><a id="Example-1"></a><a class="docs-heading-anchor-permalink" href="#Example" title="Permalink"></a></h1><pre><code class="language-julia hljs">using Plots
+using FFTW
+using VectorSpinVlasovMaxwell1D1V
+
+function run()
+
+    T = 50 # 4000  # final time
+    nx = 65   # partition of x
+    nv = 129   # partition of v
+    vmin, vmax = -2.5, 2.5
+    ke = 1.2231333040331807
+    xmin, xmax = 0.0, 4pi / ke
+    dt = 0.04
+    nsteps = floor(Int, T / dt + 1.1)
+    a = 0.02 # 0.001; perturbation coefficient
+    h_int = 0.2 # hbar
+    k0 = 2.0 * ke
+    ww = sqrt(1.0 + k0^2.0) # w0
+    ata = 0.2
+
+    mesh = Mesh(xmin, xmax, nx, vmin, vmax, nv)
+    adv  = PSMAdvection(mesh)
+
+    E1, E2, E3, A2, A3 = initialfields( mesh, a, ww, ke, k0)
+    f0, f1, f2, f3 = initialfunction(mesh, a, ke, ata)
+
+    results = Diagnostics(f0, f2, f3, E1, E2, E3, A2, A3, mesh, h_int)
+
+    H2fh = H2fhOperator(adv)
+    He = HeOperator(adv)
+    HAA = HAAOperator(adv)
+    H3fh = H3fhOperator(adv)
+    H1f = H1fOperator(adv)
+
+    for i = 1:nsteps # Loop over time
+
+        step!(f0, f1, f2, f3, E3, A3, H2fh, 0.5dt, h_int)
+        step!(f0, f1, f2, f3, E1, E2, E3, A2, A3, He, 0.5dt)
+        step!(f0, f1, f2, f3, E2, E3, A2, A3, HAA, 0.5dt)
+        step!(f0, f1, f2, f3, E2, A2, H3fh, 0.5dt, h_int)
+        step!(f0, f1, f2, f3, E1, H1f, dt)
+        step!(f0, f1, f2, f3, E2, A2, H3fh, 0.5dt, h_int)
+        step!(f0, f1, f2, f3, E2, E3, A2, A3, HAA, 0.5dt)
+        step!(f0, f1, f2, f3, E1, E2, E3, A2, A3, He, 0.5dt)
+        step!(f0, f1, f2, f3, E3, A3, H2fh, 0.5dt, h_int)
+
+        save!(results, i*dt, f0, f2, f3, E1, E2, E3, A2, A3)
+
+    end
+
+    results
+
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">run (generic function with 1 method)</code></pre><pre><code class="language- hljs">data = run()</code></pre><pre><code class="language- hljs">plot(data.time, log.(data.Ex_energy))</code></pre><pre><code class="language- hljs">plot(data.time, data.E_energy)</code></pre><pre><code class="language- hljs">plot(data.time, data.B_energy)</code></pre><pre><code class="language- hljs">plot(data.time, data.energy)</code></pre><pre><code class="language- hljs">plot(data.time, data.Sz)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../srs_without_spin/">« Validation</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label></p><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div><p></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.22 on <span class="colophon-date" title="Wednesday 17 August 2022 15:14">Wednesday 17 August 2022</span>. Using Julia version 1.7.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></HTML>
