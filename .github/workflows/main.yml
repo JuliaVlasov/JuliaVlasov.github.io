@@ -8,16 +8,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-        
+        uses: actions/checkout@v3   
       - name: Install Julia
         uses: julia-actions/setup-julia@v1
-	
       - name: Build
         run: |
          julia -e 'using Pkg; Pkg.add(url="https://github.com/JuliaComputing/MultiDocumenter.jl.git")'
-         julia index.jl
-	  
+         julia index.jl  
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
