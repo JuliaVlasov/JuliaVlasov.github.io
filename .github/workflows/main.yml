@@ -7,20 +7,22 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        persist-credentials: false
-    - name: Install Julia
-      uses: julia-actions/setup-julia@v1
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
-          version: '1'
-    - name: Build and Deploy
-	  run: |
-        julia -e 'using Pkg; Pkg.add(url="https://github.com/JuliaComputing/MultiDocumenter.jl.git")'
-        julia index.jl
-      uses: JamesIves/github-pages-deploy-action@releases/v3
-      with:
-        ACCESS_TOKEN: ${{ secrets.FRANKLIN }}
-        BRANCH: master
-        FOLDER: out
+         persist-credentials: false
+	 
+      - name: Install Julia
+        uses: julia-actions/setup-julia@v1
+	
+      - name: Build
+        run: |
+         julia -e 'using Pkg; Pkg.add(url="https://github.com/JuliaComputing/MultiDocumenter.jl.git")'
+         julia index.jl
+	  
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          ACCESS_TOKEN: ${{ secrets.FRANKLIN }}
+          branch: master
+          folder: out
