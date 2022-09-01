@@ -1,3 +1,3 @@
 # Vlasov codes in Julia language
 
-Julia Vlasov pages created with Franklin.jl
+Julia Vlasov pages created with MultiDocumenter.jl
