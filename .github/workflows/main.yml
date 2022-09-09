@@ -13,7 +13,7 @@ jobs:
         uses: julia-actions/setup-julia@v1
       - name: Build
         run: |
-         julia -e 'using Pkg; Pkg.add(url="https://github.com/JuliaComputing/MultiDocumenter.jl.git")'
+         julia -e 'using Pkg; Pkg.add("MultiDocumenter")'
          julia index.jl  
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@releases/v3
