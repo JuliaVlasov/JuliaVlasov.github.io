@@ -23,7 +23,7 @@ docs = [
         path = "scalar-spin",
         name = "SpinGEMPIC"
     ),
-    ("JuliaVlasov/VectorSpinVlasovMaxwell1D1V.jl.git", "gh-pages") => MultiDocumenter.MultiDocRef(
+    ("JuliaVlasov/VectorSpin.jl.git", "gh-pages") => MultiDocumenter.MultiDocRef(
         upstream = joinpath(clonedir, "VectorSpin"),
         path = "vector-spin",
         name = "VectorSpin"
